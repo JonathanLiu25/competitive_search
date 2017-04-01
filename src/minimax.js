@@ -1,4 +1,3 @@
-
 /*
  *
  *
@@ -21,45 +20,45 @@ you are playing against your agent.
 
 */
 
-const makeMove = function(state){
+const makeMove = function(state) {
 
-	//Find whose move it is; 'x' or 'o'
-	var playerMoving = state.nextMovePlayer;
+  //Find whose move it is; 'x' or 'o'
+  var playerMoving = state.nextMovePlayer;
 
-	// state.legalMoves returns an array of integer values,
-	// which indicate the locations (0 through 6)
-	// where one can currently legally drop a piece.
-	var allLegalMoves = state.legalMoves();
+  // state.legalMoves returns an array of integer values,
+  // which indicate the locations (0 through 6)
+  // where one can currently legally drop a piece.
+  var allLegalMoves = state.legalMoves();
 
-	// To get a successor state following a move,
-	// just call state.move(someMove).  This returns
-	// the board state after that move has been made.
-	// It autmatically switches the player whose
-	// move it is, and so on and so forth
-	//
-	// Note that state is immutable; invoking state.move
-	// does NOT change the original state, but
-	// returns a new one.
-	var newState = state.move(allLegalMoves[0]);
+  // To get a successor state following a move,
+  // just call state.move(someMove).  This returns
+  // the board state after that move has been made.
+  // It autmatically switches the player whose
+  // move it is, and so on and so forth
+  //
+  // Note that state is immutable; invoking state.move
+  // does NOT change the original state, but
+  // returns a new one.
+  var newState = state.move(allLegalMoves[0]);
 
 
-	// The following is the guts of the make-move function.
-	// The function max(arr, func) returns the element
-	// from the array "arr" which has the greatest value
-	// according to the function "func"
-	var depth = 3
-	return max(allLegalMoves, function(move){
-		var potentialState = state.move(move)
-		// In the below, the current player has been chosen as the
-		// maximizing player and passed into the minimax function.
-		//
-		// IMPORTANT: The maximizing player is the only variable passed on unchanged
-		// when the minimax function invokes itself recursively.  This is
-		// a common point of confusion.
-		//
-		return minimax(potentialState, depth, playerMoving)
-		//return minimaxAlphaBetaWrapper(potentialState, depth, playerMoving)
-	});
+  // The following is the guts of the make-move function.
+  // The function max(arr, func) returns the element
+  // from the array "arr" which has the greatest value
+  // according to the function "func"
+  var depth = 3
+  return max(allLegalMoves, function(move) {
+    var potentialState = state.move(move)
+      // In the below, the current player has been chosen as the
+      // maximizing player and passed into the minimax function.
+      //
+      // IMPORTANT: The maximizing player is the only variable passed on unchanged
+      // when the minimax function invokes itself recursively.  This is
+      // a common point of confusion.
+      //
+    return minimax(potentialState, depth, playerMoving)
+      //return minimaxAlphaBetaWrapper(potentialState, depth, playerMoving)
+  });
 
 }
 
@@ -76,11 +75,11 @@ Similarly, if you passed it ["as","xxxxx","dns"] and
 (x) => x.length, it would return "xxxxx"
 
 */
-var max = function(arr, func){
-	return arr.reduce(function(tuple, cur, index){
-		var value = func(cur)
-		return (tuple.value >= value) ? tuple : {element: cur, value: value};
-	},{element: arr[0], value: func(arr[0])}).element;
+var max = function(arr, func) {
+  return arr.reduce(function(tuple, cur, index) {
+    var value = func(cur)
+    return (tuple.value >= value) ? tuple : { element: cur, value: value };
+  }, { element: arr[0], value: func(arr[0]) }).element;
 }
 
 /*
@@ -108,18 +107,77 @@ to have longer lines than shorter lines.
 
 You'll want to pass the tests defined in minimax_specs.js.
 */
-var heuristic = function(state, maximizingPlayer){
+var heuristic = function(state, maximizingPlayer) {
 
-	//This is how you can retrieve the minimizing player.
-    var minimizingPlayer = (maximizingPlayer == 'x') ? 'o' : 'x';
+  //This is how you can retrieve the minimizing player.
+  var minimizingPlayer = (maximizingPlayer == 'x') ? 'o' : 'x';
 
-	//An example.
-    var linesOfLengthTwoForX = state.numLines(2, 'x')
+  //An example.
+  var linesOfLengthTwoForX = state.numLines(2, 'x')
+  var linesOfLengthTwoForO = state.numLines(2, 'o')
+  var linesOfLengthThreeForX = state.numLines(3, 'x')
+  var linesOfLengthThreeForO = state.numLines(3, 'o')
+  var linesOfLengthFourForX = state.numLines(4, 'x')
+  var linesOfLengthFourForO = state.numLines(4, 'o')
 
-    //Your code here.  Don't return random, obviously.
-	return Math.random()
+  //Your code here.  Don't return random, obviously.
+  // return Math.random()
+
+  let result = 0
+
+  if (linesOfLengthFourForX > linesOfLengthFourForO) {
+    result += (linesOfLengthFourForX - linesOfLengthFourForO) * 100
+  } else {
+    result += (linesOfLengthFourForO - linesOfLengthFourForX) * 100
+  }
+
+  if (linesOfLengthThreeForX > linesOfLengthThreeForO) {
+    result += (linesOfLengthThreeForX - linesOfLengthThreeForO) * 100
+  } else {
+    result += (linesOfLengthThreeForO - linesOfLengthThreeForX) * 100
+  }
+
+  if (linesOfLengthTwoForX > linesOfLengthTwoForO) {
+    result += (linesOfLengthTwoForX - linesOfLengthTwoForO) * 10
+  } else {
+    result += (linesOfLengthTwoForO - linesOfLengthTwoForX) * 10
+  }
+
+  if (maximizingPlayer === 'o') {
+    result = -result
+  }
+
+  return result
 }
 
+// var heuristic = function(state, maximizingPlayer) {
+
+//   //This is how you can retrieve the minimizing player.
+//   var minimizingPlayer = (maximizingPlayer == 'x') ? 'o' : 'x';
+
+//   //An example.
+//   var linesOfLengthTwoForX = state.numLines(2, 'x')
+//   var linesOfLengthTwoForO = state.numLines(2, 'o')
+//   var linesOfLengthThreeForX = state.numLines(3, 'x')
+//   var linesOfLengthThreeForO = state.numLines(3, 'o')
+
+//   //Your code here.  Don't return random, obviously.
+//   // return Math.random()
+
+//   let result
+
+//   if (linesOfLengthTwoForX > linesOfLengthTwoForO) {
+//     result = linesOfLengthTwoForX
+//   } else {
+//     result = linesOfLengthTwoForO
+//   }
+
+//   if (maximizingPlayer === 'o') {
+//     result = -result
+//   }
+
+//   return result
+// }
 
 
 /*
@@ -141,12 +199,25 @@ You'll also probably need to use state.nextMovePlayer,
 which returns whether the next moving player is 'x' or 'o',
 to see if you are maximizing or minimizing.
 */
-var minimax = function(state, depth, maximizingPlayer){
-	var minimizingPlayer = (maximizingPlayer == 'x') ? 'o' : 'x';
-	var possibleStates = state.nextStates();
-	var currentPlayer = state.nextMovePlayer;
-	//Your code here.
-	return Math.random();
+var minimax = function(state, depth, maximizingPlayer) {
+
+  var minimizingPlayer = (maximizingPlayer == 'x') ? 'o' : 'x';
+  var possibleStates = state.nextStates();
+  var currentPlayer = state.nextMovePlayer;
+  //Your code here.
+  // return Math.random();
+  if (depth === 0) {
+    // console.log(heuristic(state, maximizingPlayer))
+    return heuristic(state, maximizingPlayer)
+  }
+
+  if (!possibleStates.length) {
+    return heuristic(state, maximizingPlayer)
+  }
+
+  possibleStates.map(nextState => {
+    return minimax(nextState, depth - 1, currentPlayer)
+  })
 }
 
 
@@ -155,9 +226,9 @@ var minimax = function(state, depth, maximizingPlayer){
    unless you fill in minimaxAB within it.
 
    It is called with the same values with which minimax itself is called.*/
-var minimaxAlphaBetaWrapper = function(state, depth, maximizingPlayer){
+var minimaxAlphaBetaWrapper = function(state, depth, maximizingPlayer) {
 
-    /*
+  /*
     You will need to write minimaxAB for the extra credit.
     Input: state and depth are as they are before.  (Maximizing player
     is closed over from the parent function.)
@@ -169,12 +240,11 @@ var minimaxAlphaBetaWrapper = function(state, depth, maximizingPlayer){
     Beta is the BEST value currently guaranteed to the minimizing
     player, if they play well, no matter what the maximizing player
     does; this is why it is a very high value to start with.
-	*/
-	var minimaxAB = function(state, depth, alpha, beta){
-	}
+  */
+  var minimaxAB = function(state, depth, alpha, beta) {}
 
-	return minimaxAB(state, depth, -100000,100000)
+  return minimaxAB(state, depth, -100000, 100000)
 }
 
 //ecxport default {makeMove, minimax, heuristic};
-module.exports = {makeMove, minimax, heuristic};
+module.exports = { makeMove, minimax, heuristic };
